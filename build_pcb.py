@@ -35,7 +35,7 @@ ds.m_MinThroughDrill = MM(0.25)
 ds.m_CopperEdgeClearance = MM(0.3)
 ns = ds.m_NetSettings
 dc = ns.m_DefaultNetClass
-dc.SetClearance(MM(0.15)); dc.SetTrackWidth(MM(0.2)); dc.SetViaDiameter(MM(0.6)); dc.SetViaDrill(MM(0.3))
+dc.SetClearance(MM(0.15)); dc.SetTrackWidth(MM(0.15)); dc.SetViaDiameter(MM(0.5)); dc.SetViaDrill(MM(0.25))
 pc = pcbnew.NETCLASS('Power')
 pc.SetClearance(MM(0.2)); pc.SetTrackWidth(MM(0.5)); pc.SetViaDiameter(MM(0.8)); pc.SetViaDrill(MM(0.4))
 ns.m_NetClasses['Power'] = pc
@@ -164,12 +164,19 @@ for r in sorted(auto, key=lambda s: (s[0], int(re.sub(r'\D', '', s) or 0))):
         ref_ic, pad = 'U1', ring['+3V3'][0]
     ANCH[r] = (ref_ic, pad)
 order = sorted(ANCH, key=lambda s: (s[0] != 'C', s))
-for r in sorted(ANCH, key=lambda s: (0 if s.startswith(('C3', 'C4', 'R3', 'R4', 'TP')) else 1, s)):
+for r in sorted(ANCH, key=lambda s: (0 if s.startswith(('C3', 'C4', 'R3', 'R4')) else 1, s)):
+    if r.startswith('TP'): continue
     ic, pad = ANCH[r]
     ax_, ay_ = padpos(ic, pad)
     cx, cy = ToMM(F[ic].GetPosition().x), ToMM(F[ic].GetPosition().y)
     d = (ax_ - cx, ay_ - cy); L = math.hypot(*d) or 1
     near(r, (ax_, ay_), 90 if r[0] in 'RC' else 0, pref=(d[0] / L, d[1] / L))
+
+# test points: back side row (pads only, no assembly)
+for i in range(8):
+    tp = f'TP{i+1}'
+    at(tp, 56 + 4.0 * i, 46.0)
+    F[tp].Flip(F[tp].GetPosition(), False)
 
 # ---------------- outline
 def line(x1, y1, x2, y2):

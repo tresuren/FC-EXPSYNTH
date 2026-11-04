@@ -38,6 +38,8 @@ for n in find(net_out,'net'):
         via=pcbnew.PCB_VIA(bd); via.SetPosition(VECTOR2I(MM(x),MM(-y))); via.SetWidth(MM(d)); via.SetDrill(MM(dr))
         via.SetViaType(pcbnew.VIATYPE_THROUGH); via.SetLayerPair(pcbnew.F_Cu,pcbnew.B_Cu); via.SetNet(ni); bd.Add(via); nv+=1
 print('segments',nw,'vias',nv)
+for z in bd.Zones():
+    z.SetPadConnection(pcbnew.ZONE_CONNECTION_FULL); z.SetLocalClearance(MM(0.15)); z.SetMinThickness(MM(0.15))
 pcbnew.ZONE_FILLER(bd).Fill(bd.Zones())
 bd.BuildConnectivity()
 print('unrouted', bd.GetConnectivity().GetUnconnectedCount(False))
