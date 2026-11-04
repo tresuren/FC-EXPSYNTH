@@ -6,6 +6,7 @@ HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 NET = f'{HERE}/fc.net'
 KFP = '/usr/share/kicad/footprints'
 W, H, TL = 92.0, 60.0, 10.7
+H = float(os.environ.get('H_MM', H)); dH = H - 60.0
 BODY_BOTTOM = H - TL
 
 # ---------------- parse netlist
@@ -113,13 +114,13 @@ fixed('U4', 68, 26)
 fixed('J13', 14.5, 17, 270)      # microSD, opening toward left edge
 fixed('J12', W - 4.3, 15, 90)    # USB-C, opening toward right edge
 fixed('J14', 86.5, 27, 0)
-fixed('J4', 7, 46, 0)
+fixed('J4', 7, 46+dH, 0)
 fixed('SW1', 6, 31, 0)
 fixed('SW2', 6, 38, 0)
 fixed('Y1', 26, 30, 0)
 fixed('L1', 26, 21, 0)
-fixed('U10', 18, 42); fixed('U11', 31, 42); fixed('U12', 44, 42); fixed('U13', 57, 42)
-fixed('U14', 70, 42); fixed('U15', 80, 42)
+fixed('U10', 18, 42+dH); fixed('U11', 31, 42+dH); fixed('U12', 44, 42+dH); fixed('U13', 57, 42+dH)
+fixed('U14', 70, 42+dH); fixed('U15', 80, 42+dH)
 fixed('U16', 76, 20)
 fixed('D10', 62, 33); fixed('D11', 78, 7)
 for r in placed: 
@@ -175,7 +176,7 @@ for r in sorted(ANCH, key=lambda s: (0 if s.startswith(('C3', 'C4', 'R3', 'R4'))
 # test points: back side row (pads only, no assembly)
 for i in range(8):
     tp = f'TP{i+1}'
-    at(tp, 56 + 4.0 * i, 46.0)
+    at(tp, 56 + 4.0 * i, 46.0+dH)
     F[tp].Flip(F[tp].GetPosition(), False)
 
 # ---------------- outline
@@ -232,7 +233,7 @@ def keepout_all(name, poly, layers, vias=True, tracks=True):
     bd.Add(z)
 fp_ = [p for p in F['J10'].Pads() if p.GetLayer() == pcbnew.F_Cu]
 boxes = sorted([(ToMM(p.GetBoundingBox().GetX()), ToMM(p.GetBoundingBox().GetRight()), ToMM(p.GetBoundingBox().GetY())) for p in fp_])
-ytop = min(b[2] for b in boxes)
+ytop = BODY_BOTTOM - 0.2   # whole tongue: only straight-up exits above each finger
 xs = [tx0 - 1.0] + [v for b in boxes for v in (b[0], b[1])] + [tx1 + 1.0]
 for i in range(0, len(xs) - 1, 2):
     a, b2 = xs[i], xs[i + 1]
