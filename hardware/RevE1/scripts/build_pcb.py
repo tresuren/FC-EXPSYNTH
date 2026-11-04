@@ -2,7 +2,7 @@ import re, math, sys, os
 import pcbnew
 from pcbnew import FromMM as MM, ToMM, VECTOR2I, wxPoint
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 NET = f'{HERE}/fc.net'
 KFP = '/usr/share/kicad/footprints'
 W, H, TL = 92.0, 60.0, 10.7
@@ -202,6 +202,21 @@ poly = [(0.3, 0.3), (W - 0.3, 0.3), (W - 0.3, BODY_BOTTOM - 0.3), (0.3, BODY_BOT
 zone(pcbnew.In1_Cu, 'GND', poly)
 zone(pcbnew.In2_Cu, '+3V3', poly)
 zone(pcbnew.B_Cu, 'GND', poly)
+
+# via keep-outs: no vias between the top straddle pads nor between the cartridge-edge fingers
+def keepout(name, poly):
+    z = pcbnew.ZONE(bd)
+    z.SetIsRuleArea(True)
+    z.SetDoNotAllowVias(True); z.SetDoNotAllowTracks(False); z.SetDoNotAllowCopperPour(False)
+    z.SetDoNotAllowPads(False); z.SetDoNotAllowFootprints(False)
+    ls = pcbnew.LSET(); 
+    for l in (pcbnew.F_Cu, pcbnew.In1_Cu, pcbnew.In2_Cu, pcbnew.B_Cu): ls.AddLayer(l)
+    z.SetLayerSet(ls); z.SetZoneName(name)
+    ol = z.Outline(); ol.NewOutline()
+    for (px, py) in poly: ol.Append(MM(px), MM(py))
+    bd.Add(z)
+keepout('NOVIA_TOP_PADS', [(0, -1), (W, -1), (W, 4.8), (0, 4.8)])
+keepout('NOVIA_FINGERS', [(tx0 - 1, BODY_BOTTOM - 0.5), (tx1 + 1, BODY_BOTTOM - 0.5), (tx1 + 1, H + 1), (tx0 - 1, H + 1)])
 
 pcbnew.SaveBoard(f'{HERE}/FC-EXPSYNTH.kicad_pcb', bd)
 print('saved; footprints', len(F))

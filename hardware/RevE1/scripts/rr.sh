@@ -1,11 +1,11 @@
 #!/bin/bash
 # usage: rr.sh  (starts API server, routes route.dsn, collector -> stream_all.txt)
-cd "$(dirname "$0")"
+cd "$(dirname "$0")/.."   # run from the project dir; needs FR_JAR=/path/to/freerouting.jar
 python3 -c "
 import pcbnew
 bd=pcbnew.LoadBoard('FC-EXPSYNTH.kicad_pcb')
 for z in list(bd.Zones()):
-    if z.GetLayer()==pcbnew.In2_Cu: bd.Remove(z)
+    if z.GetLayer()==pcbnew.In2_Cu and not z.GetIsRuleArea(): bd.Remove(z)
 print(pcbnew.ExportSpecctraDSN(bd,'route.dsn'))"
 python3 - <<'P'
 import base64,json
@@ -13,7 +13,7 @@ json.dump({'filename':'route.dsn','data':base64.b64encode(open('route.dsn','rb')
 P
 B=http://127.0.0.1:37864; H1="Freerouting-Profile-ID: 3f2b8c1e-5a7d-4e19-9c3a-1d2e4f6a8b0c"; H2="Freerouting-Environment-Host: KiCad/7.0"
 if ! curl -s $B/v1/system/status >/dev/null; then
-  setsid nohup java -Xmx3g -jar ../tools/fr.jar --api_server-enabled=true > fr_api.log 2>&1 < /dev/null &
+  setsid nohup java -Xmx3g -jar "${FR_JAR:-fr.jar}" --api_server-enabled=true > fr_api.log 2>&1 < /dev/null &
   for i in $(seq 1 20); do sleep 2; curl -s $B/v1/system/status >/dev/null && break; done
 fi
 S=$(curl -s -X POST $B/v1/sessions/create -H "$H1" -H "$H2" | python3 -c "import sys,json;print(json.load(sys.stdin)['id'])")
