@@ -7,5 +7,5 @@
 - `firmware/` — RP2350ファーム(現在 stage1_bus_test)
 
 ## バージョン管理
-- リビジョンはフォルダ(`hardware/RevE1/` など)とgitタグで管理。大きな設計変更は新フォルダ(RevE2…)で行う。
+- リビジョンはフォルダ(`hardware/RevE1/` など)で管理。大きな設計変更は新フォルダ(RevE2…)で行う。
 - 現在: **RevE1(ドラフト)** — 92x60mm・片面SMD、配線は一部未接続。詳細は `hardware/RevE1/README.md`。
