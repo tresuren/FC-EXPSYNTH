@@ -218,5 +218,29 @@ def keepout(name, poly):
 keepout('NOVIA_TOP_PADS', [(0, -1), (W, -1), (W, 4.8), (0, 4.8)])
 keepout('NOVIA_FINGERS', [(tx0 - 1, BODY_BOTTOM - 0.5), (tx1 + 1, BODY_BOTTOM - 0.5), (tx1 + 1, H + 1), (tx0 - 1, H + 1)])
 
+# no copper tracks/vias on the outer layers in the contact-finger band, except the finger pads themselves
+def keepout_all(name, poly, layers, vias=True, tracks=True):
+    z = pcbnew.ZONE(bd)
+    z.SetIsRuleArea(True)
+    z.SetDoNotAllowVias(vias); z.SetDoNotAllowTracks(tracks); z.SetDoNotAllowCopperPour(True)
+    z.SetDoNotAllowPads(False); z.SetDoNotAllowFootprints(False)
+    ls = pcbnew.LSET()
+    for l in layers: ls.AddLayer(l)
+    z.SetLayerSet(ls); z.SetZoneName(name)
+    ol = z.Outline(); ol.NewOutline()
+    for (px, py) in poly: ol.Append(MM(px), MM(py))
+    bd.Add(z)
+fp_ = [p for p in F['J10'].Pads() if p.GetLayer() == pcbnew.F_Cu]
+boxes = sorted([(ToMM(p.GetBoundingBox().GetX()), ToMM(p.GetBoundingBox().GetRight()), ToMM(p.GetBoundingBox().GetY())) for p in fp_])
+ytop = min(b[2] for b in boxes)
+xs = [tx0 - 1.0] + [v for b in boxes for v in (b[0], b[1])] + [tx1 + 1.0]
+for i in range(0, len(xs) - 1, 2):
+    a, b2 = xs[i], xs[i + 1]
+    if b2 - a > 0.05:
+        keepout_all(f'NOTRACK_GAP{i//2}', [(a, ytop), (b2, ytop), (b2, H + 1), (a, H + 1)], (pcbnew.F_Cu, pcbnew.B_Cu))
+# below the fingers (tongue tip): nothing at all on outer layers
+ybot = max(ToMM(p.GetBoundingBox().GetBottom()) for p in fp_)
+keepout_all('NOTRACK_TIP', [(tx0 - 1, ybot), (tx1 + 1, ybot), (tx1 + 1, H + 1), (tx0 - 1, H + 1)], (pcbnew.F_Cu, pcbnew.B_Cu))
+
 pcbnew.SaveBoard(f'{HERE}/FC-EXPSYNTH.kicad_pcb', bd)
 print('saved; footprints', len(F))
