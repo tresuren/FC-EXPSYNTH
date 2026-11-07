@@ -249,5 +249,22 @@ for i in range(0, len(xs) - 1, 2):
 ybot = max(ToMM(p.GetBoundingBox().GetBottom()) for p in fp_)
 keepout_all('NOTRACK_TIP', [(tx0 - 1, ybot), (tx1 + 1, ybot), (tx1 + 1, H + 1), (tx0 - 1, H + 1)], (pcbnew.F_Cu, pcbnew.B_Cu))
 
+# RevE5: keep routed copper 0.45mm away from the board outline (Freerouting ignores the copper-to-edge rule)
+def edge_keepout(name, poly):
+    z = pcbnew.ZONE(bd); z.SetIsRuleArea(True)
+    z.SetDoNotAllowVias(True); z.SetDoNotAllowTracks(True); z.SetDoNotAllowCopperPour(False)
+    z.SetDoNotAllowPads(False); z.SetDoNotAllowFootprints(False)
+    ls = pcbnew.LSET()
+    for l in (pcbnew.F_Cu, pcbnew.In1_Cu, pcbnew.In2_Cu, pcbnew.B_Cu): ls.AddLayer(l)
+    z.SetLayerSet(ls); z.SetZoneName(name)
+    ol = z.Outline(); ol.NewOutline()
+    for (px, py) in poly: ol.Append(MM(px), MM(py))
+    bd.Add(z)
+E = 0.45
+edge_keepout('NOTRACK_EDGE_TOP', [(-1, -1), (W + 1, -1), (W + 1, E), (-1, E)])
+edge_keepout('NOTRACK_EDGE_LEFT', [(-1, -1), (E, -1), (E, BODY_BOTTOM + 1), (-1, BODY_BOTTOM + 1)])
+edge_keepout('NOTRACK_EDGE_RIGHT', [(W - E, -1), (W + 1, -1), (W + 1, BODY_BOTTOM + 1), (W - E, BODY_BOTTOM + 1)])
+edge_keepout('NOTRACK_EDGE_BL', [(-1, BODY_BOTTOM - E), (tx0, BODY_BOTTOM - E), (tx0, BODY_BOTTOM + 1), (-1, BODY_BOTTOM + 1)])
+edge_keepout('NOTRACK_EDGE_BR', [(tx1, BODY_BOTTOM - E), (W + 1, BODY_BOTTOM - E), (W + 1, BODY_BOTTOM + 1), (tx1, BODY_BOTTOM + 1)])
 pcbnew.SaveBoard(f'{HERE}/FC-EXPSYNTH.kicad_pcb', bd)
 print('saved; footprints', len(F))
