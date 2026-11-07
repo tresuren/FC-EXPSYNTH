@@ -1,0 +1,34 @@
+# FC-EXPSYNTH (Rev.E4 draft) — E3 の電源まわりを修正
+
+RevE3 の回路・基板サイズ・部品(BOM)はそのまま。電源配線の太さと、RP2350 のコア電源(1.1V スイッチング電源)のインダクタ配置を直した版。
+
+## RevE3 からの変更点
+- **L1(3.3µH、RP2350 内蔵スイッチング電源のインダクタ)を U1 の VREG_LX ピン(63番)の隣へ移動**: (26.0, 21.0) → (47.25, 17.5)、向き 270°。LX 配線は約 20mm(裏面 0.1mm 幅)→ 約 2mm(表面 0.2〜0.4mm 幅)。
+- **C11(+1V1 の 100nF)を L1 の出力側の隣へ移動**: (48.8, 17.6)。GND 側はすぐ横のビアで内層 GND 面へ。
+- **R3 / C9(VREG_AVDD の 33Ω+4.7µF フィルタ)を右へ移動**: R3 (50.25, 17.0)、C9 (51.7, 17.0)。C11 の場所を空けるため。
+- 上記の周りの配線(+1V1、VREG_AVDD、R3 の +3V3、C9 の GND)を引き直し。L1 出力の +1V1 は、L1 の下のビアから内層 In2 を通って U1 の +1V1 配線へ接続。
+- **電源ネットの配線を、空きのある区間だけ太くした**(0.1mm → 最大 0.4mm。クリアランス 0.1mm+余裕 0.012mm、穴間隔 0.2mm、基板端 0.3mm を守る範囲)。
+  - +5V: 0.4mm 56mm / 0.2〜0.3mm 45mm / 0.15mm 55mm / 0.1mm 56mm(最長の細い区間は右端の 0.15mm×28mm、0.3A で約 30mV 降下)
+  - +3V3: 主に内層 In2 の面で供給。配線は 0.4mm 136mm / 0.2〜0.3mm 34mm / 0.15mm 41mm / 0.1mm 89mm
+  - +1V1: 0.4mm 30mm / 0.3mm 10mm / 0.1〜0.2mm 約 11mm
+- 古い L1 位置へ伸びていた +1V1 / LX の配線は削除。
+
+## 状態(正直な現状)
+- DRC(`docs/drc.rpt`、同梱の `.kicad_pro` ルール): **未接続0・クリアランス違反0・短絡0・穴間隔違反0・禁止エリア違反0**。残りは警告のみ: silk_overlap 32(E3 から +5、移動した L1/C11/R3/C9 の部品名の印字) / silk_over_copper 31 / silk_edge_clearance 2 / lib_footprint_issues 95 / courtyards_overlap 1(J10とJ4、E2 から同じ) / track_dangling 9 / via_dangling 1。
+- 余り線(dangling)は、同じネットの銅箔に終端するものがあり、機械的に消すと接続が切れる場合があった。そのため残している。
+- J13とJ12のGNDパッドは、パッドの上にビアがある(via-in-pad)。ハンダがビアへ流れる可能性あり。
+- 電源線は空きのある区間だけ太くした。狭い区間(QFNピン付近、バスの密集部)は 0.1〜0.15mm のまま。実機での電源品質は未検証。
+- **水晶 Y1(12MHz)は RP2350 から約 17mm 離れたまま**(XIN 配線約 23mm、裏面、周囲は GND ベタ)。U1 の下側はバスの配線が密集しており、移動は見送った。発振の安定性は実機で確認が必要。
+- L1 は向き(極性)の印がある 2016 サイズ(フットプリント `L_pol_2016`)。実装向きは JLCPCB の部品配置確認で要チェック。
+- **microSD(Hirose DM3AT)とUSB-C(HRO TYPE-C-31-M-12)の実物の寸法は、フットプリントからの読み取りのみ**。データシートで確認していない。ケース設計の前に要確認。
+- 接触指(J10)・上部コネクタ(J11)のフットプリント寸法(仮寸法)、JLCPCB見積り、LCSC部品番号、ERC、ファーム実機動作は未確認(RevE2と同じ)。
+- **画面関係(PPU)の28本はJ10/J11とも未接続のまま**。上部カセットのゲームは普通には動かない(音源のみ)。直結する試作配線は、下側の接触指付近が詰まって通らず見送った。
+
+## 図面
+- `docs/pcb_render.png`(表面)、`docs/pcb_render_back.png`(裏面、左右反転表示)、`docs/fc_sch.pdf`(回路図)、`docs/drc.rpt`(DRC結果)
+
+## 再生成
+RevE4 は RevE3 の基板から: `scripts/widen.py`(電源配線を太くする) → `scripts/l1_edit.py` + `scripts/clear_fp.py`(L1 移動) → `scripts/edit2.py`(R3/C9/C11 移動、LX と +1V1 の手配線) → `scripts/route_fix5.py`(`HARD=1`、残りの接続を自動配線) → `scripts/prune_pts.py`(古い L1 への余り線を削除) → `scripts/widen.py` をもう一度。`scripts/build_pcb.py` の L1 の位置は古いまま(RevE2 時点)。確定版はこのフォルダの `FC-EXPSYNTH.kicad_pcb`。
+
+### RevE3 の再生成(参考)
+基板は RevE2 の `FC-EXPSYNTH.kicad_pcb` から作った。`scripts/move_edge_parts_a.py`(部品移動・接触配線のはがし・GNDビア追加) → `scripts/route_fix4.py`(`HARD=1` で他の線をはがさない配線補完)/ `scripts/route_fix5.py`(クリアランスを0.103mmに緩めた版、最後の1本に使用) → 手動で重複ビアの統合とUSB-C付近の配線の位置ずらし。結果は実行ごとに変わるので、確定した配線はこのフォルダの `FC-EXPSYNTH.kicad_pcb` を正とする。
