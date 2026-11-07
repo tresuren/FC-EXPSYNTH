@@ -115,8 +115,8 @@ fixed('J11', W / 2, 0.0, 0)
 fixed('U1', 44, 25)
 fixed('U3', 68, 12)
 fixed('U4', 68, 26)
-fixed('J13', 14.5, 17, 270)      # microSD, opening toward left edge
-fixed('J12', W - 4.3, 15, 90)    # USB-C, opening toward right edge
+fixed('J13', 12.0, 17, 270)      # microSD: shell front ~1.75mm beyond the left edge (RevE3 position, for the case)
+fixed('J12', W - 3.65, 15, 90)   # USB-C: front flush with the right edge (RevE3 position)
 fixed('J14', 86.5, 27, 0)
 fixed('J4', 7, 46+dH, 0)
 fixed('SW1', 6, 31, 0)
@@ -266,5 +266,17 @@ edge_keepout('NOTRACK_EDGE_LEFT', [(-1, -1), (E, -1), (E, BODY_BOTTOM + 1), (-1,
 edge_keepout('NOTRACK_EDGE_RIGHT', [(W - E, -1), (W + 1, -1), (W + 1, BODY_BOTTOM + 1), (W - E, BODY_BOTTOM + 1)])
 edge_keepout('NOTRACK_EDGE_BL', [(-1, BODY_BOTTOM - E), (tx0, BODY_BOTTOM - E), (tx0, BODY_BOTTOM + 1), (-1, BODY_BOTTOM + 1)])
 edge_keepout('NOTRACK_EDGE_BR', [(tx1, BODY_BOTTOM - E), (W + 1, BODY_BOTTOM - E), (W + 1, BODY_BOTTOM + 1), (tx1, BODY_BOTTOM + 1)])
+# footprint-internal keep-outs (microSD) -> board-level rule areas: newer KiCad versions place footprint rule areas
+# differently when opening this file, so keep them at fixed absolute coordinates on the board instead
+for f in list(F.values()):
+    for z in list(f.Zones()):
+        if not z.GetIsRuleArea(): continue
+        nz = pcbnew.ZONE(bd); nz.SetIsRuleArea(True)
+        nz.SetDoNotAllowTracks(z.GetDoNotAllowTracks()); nz.SetDoNotAllowVias(z.GetDoNotAllowVias())
+        nz.SetDoNotAllowCopperPour(z.GetDoNotAllowCopperPour()); nz.SetDoNotAllowPads(False); nz.SetDoNotAllowFootprints(False)
+        nz.SetLayerSet(z.GetLayerSet()); nz.SetZoneName(f'KEEPOUT_{f.GetReference()}')
+        ol = nz.Outline(); ol.NewOutline(); src = z.Outline().COutline(0)
+        for k in range(src.PointCount()): ol.Append(src.CPoint(k).x, src.CPoint(k).y)
+        bd.Add(nz); f.Remove(z)
 pcbnew.SaveBoard(f'{HERE}/FC-EXPSYNTH.kicad_pcb', bd)
 print('saved; footprints', len(F))
