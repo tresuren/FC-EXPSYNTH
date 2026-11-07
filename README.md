@@ -8,5 +8,6 @@
 
 ## バージョン管理
 - リビジョンはフォルダ(`hardware/RevE1/` など)で管理。大きな設計変更は新フォルダ(RevE2…)で行う。
-- 現在: **RevE2(ドラフト)** — 92x60mm、表面SMD+裏面7個手半田、配線完了(DRC 未接続0)。詳細は `hardware/RevE2/README.md`。
+- 現在: **RevE3(ドラフト)** — RevE2から microSD・USB-C を基板端へ移動(ケース用)。DRC 未接続0。詳細は `hardware/RevE3/README.md`。
+- RevE2 — 92x60mm、表面SMD+裏面7個手半田、配線完了。`hardware/RevE2/` に残す。
 - 過去: RevE1 — 配線7本未接続のため RevE2 で置き換え。`hardware/RevE1/` に残す。
