@@ -10,8 +10,7 @@ def edge():
          '  (attr smd exclude_from_pos_files exclude_from_bom)',
          f'  (fp_text reference "J10" (at 0 -2 0) (layer "F.SilkS") (effects (font (size 1 1) (thickness 0.15))) (tstamp {u()}))',
          f'  (fp_text value "FC_Cart_Edge_60" (at 0 -4 0) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))) (tstamp {u()}))']
-    for layer in ('F.Mask', 'B.Mask'):
-        o.append(f'  (fp_rect (start {-hw} 2.4) (end {hw} {TL}) (stroke (width 0) (type solid)) (fill solid) (layer "{layer}") (tstamp {u()}))')
+    # (no whole-tongue solder-mask opening: each finger pad has its own mask opening)
     o.append(f'  (fp_rect (start {-hw} 0) (end {hw} {TL}) (stroke (width 0.1) (type solid)) (fill none) (layer "F.Fab") (tstamp {u()}))')
     o.append(f'  (fp_rect (start {-hw-0.25} -0.25) (end {hw+0.25} {TL+0.25}) (stroke (width 0.05) (type solid)) (fill none) (layer "F.CrtYd") (tstamp {u()}))')
     for k in range(30):

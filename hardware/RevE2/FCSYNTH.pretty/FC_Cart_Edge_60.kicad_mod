@@ -6,8 +6,6 @@
   (attr smd exclude_from_pos_files exclude_from_bom)
   (fp_text reference "J10" (at 0 -2 0) (layer "F.SilkS") (effects (font (size 1 1) (thickness 0.15))) (tstamp 95d2a518-e08a-4232-96ef-4b57d5ca7615))
   (fp_text value "FC_Cart_Edge_60" (at 0 -4 0) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))) (tstamp 94f17c60-4494-43d8-8480-c9f24b3ac223))
-  (fp_rect (start -39.2 2.4) (end 39.2 10.7) (stroke (width 0) (type solid)) (fill solid) (layer "F.Mask") (tstamp 1647876b-bd7d-4f1f-8a71-90594f58c013))
-  (fp_rect (start -39.2 2.4) (end 39.2 10.7) (stroke (width 0) (type solid)) (fill solid) (layer "B.Mask") (tstamp 463e5661-0697-4b9a-b769-3292926797a5))
   (fp_rect (start -39.2 0) (end 39.2 10.7) (stroke (width 0.1) (type solid)) (fill none) (layer "F.Fab") (tstamp 3f8fdd6f-24ce-4bdb-86f8-390ee1e18b5a))
   (fp_rect (start -39.45 -0.25) (end 39.45 10.95) (stroke (width 0.05) (type solid)) (fill none) (layer "F.CrtYd") (tstamp df19a351-5c0a-4e34-9adc-41f06cef0ee4))
   (pad "1" smd rect (at -37.33 6.35) (size 2.6 6.7) (layers "F.Cu" "F.Mask") (tstamp 33da8e44-b965-406d-b2da-c60cac695f0c))
