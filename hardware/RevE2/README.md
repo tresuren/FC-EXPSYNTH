@@ -21,5 +21,8 @@ RevE1 からの変更版。ファミコン拡張音源カセット(VRC6/VRC7/N16
 - 実機タイミング、スロットフットプリント(仮寸法)、LCSC部品番号、RP2350B A4ステッピング/5Vトレラント条件、N163/VRC7レジスタ詳細は未確認(RevE1と同じ)。
 - 裏面コンデンサの位置はU1直下。デカップリングとして十分かの検証なし。
 
+## 図面
+- `docs/pcb_render.png`(表面)、`docs/pcb_render_back.png`(裏面、左右反転表示)、`docs/fc_sch.pdf`(回路図)、`docs/drc.rpt`(DRC結果)
+
 ## 再生成
 `scripts/gen_sch.py`(回路図) → `kicad-cli sch export netlist`(fc.net) → `scripts/build_pcb.py`(配置) → Freerouting(`rr.sh`等、RevE1と同じ) → `scripts/route_fix2.py`(残りを自作探索で補完、`HARD=1` で他の線をはがさない) → `scripts/finalize.py`(重複ビア整理・GND島の接続)。再生成の結果は実行ごとに変わる(自動配線の乱数性)ので、確定した配線はこのフォルダの `FC-EXPSYNTH.kicad_pcb` を正とする。
