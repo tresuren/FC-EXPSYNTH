@@ -12,9 +12,10 @@ RevE3 の回路・基板サイズ・部品(BOM)はそのまま。電源配線の
   - +3V3: 主に内層 In2 の面で供給。配線は 0.4mm 136mm / 0.2〜0.3mm 34mm / 0.15mm 41mm / 0.1mm 89mm
   - +1V1: 0.4mm 30mm / 0.3mm 10mm / 0.1〜0.2mm 約 11mm
 - 古い L1 位置へ伸びていた +1V1 / LX の配線は削除。
+- **部品名(リファレンス)の文字を 1.0mm → 0.8mm(線幅 0.15 → 0.12mm)に縮小**(表裏 95 個)。JLCPCB の高精度文字の下限(高さ 0.8mm・線幅 0.1mm)以内。シルクの重なり警告は 32 → 21、パッドへのはみ出しは 31 → 26。
 
 ## 状態(正直な現状)
-- DRC(`docs/drc.rpt`、同梱の `.kicad_pro` ルール): **未接続0・クリアランス違反0・短絡0・穴間隔違反0・禁止エリア違反0**。残りは警告のみ: silk_overlap 32(E3 から +5、移動した L1/C11/R3/C9 の部品名の印字) / silk_over_copper 31 / silk_edge_clearance 2 / lib_footprint_issues 95 / courtyards_overlap 1(J10とJ4、E2 から同じ) / track_dangling 9 / via_dangling 1。
+- DRC(`docs/drc.rpt`、同梱の `.kicad_pro` ルール): **未接続0・クリアランス違反0・短絡0・穴間隔違反0・禁止エリア違反0**。残りは警告のみ: silk_overlap 21 / silk_over_copper 26 / silk_edge_clearance 2 / lib_footprint_issues 95 / courtyards_overlap 1(J10とJ4、E2 から同じ) / track_dangling 9 / via_dangling 1。
 - 余り線(dangling)は、同じネットの銅箔に終端するものがあり、機械的に消すと接続が切れる場合があった。そのため残している。
 - J13とJ12のGNDパッドは、パッドの上にビアがある(via-in-pad)。ハンダがビアへ流れる可能性あり。
 - 電源線は空きのある区間だけ太くした。狭い区間(QFNピン付近、バスの密集部)は 0.1〜0.15mm のまま。実機での電源品質は未検証。
